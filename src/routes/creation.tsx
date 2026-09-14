@@ -51,7 +51,7 @@ function PageCreation() {
   const [quantite, setQuantite] = useState("1");
   const [lot, setLot] = useState("");
   const [emplacementId, setEmplacementId] = useState("");
-  const [scannerOuvert, setScannerOuvert] = useState(false);
+  const [scannerCible, setScannerCible] = useState<"emplacement" | "ean" | null>(null);
   const [enCours, setEnCours] = useState(false);
   const [creee, setCreee] = useState<string | null>(null);
 
@@ -152,7 +152,7 @@ function PageCreation() {
             </SelectContent>
           </Select>
           <BoutonScanner
-            onClick={() => setScannerOuvert(true)}
+            onClick={() => setScannerCible("emplacement")}
             label="Scanner l'emplacement"
           />
         </div>
