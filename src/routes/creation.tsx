@@ -111,7 +111,9 @@ function PageCreation() {
               ))}
             </SelectContent>
           </Select>
+          <BoutonScanner onClick={() => setScannerCible("ean")} label="Scanner un code EAN" />
         </div>
+
 
         <div className="space-y-2">
           <Label htmlFor="quantite">Quantité</Label>
