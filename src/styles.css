@@ -106,7 +106,6 @@
 @theme inline {
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
-  --font-display: var(--font-display);
   --font-sans: var(--font-body);
 }
 
