@@ -167,11 +167,22 @@ function PageCreation() {
       </form>
 
       <ScannerDialog
-        open={scannerOuvert}
-        titre="Scanner l'emplacement"
-        onClose={() => setScannerOuvert(false)}
+        open={scannerCible !== null}
+        titre={scannerCible === "ean" ? "Scanner le code EAN" : "Scanner l'emplacement"}
+        onClose={() => setScannerCible(null)}
         onResult={async (valeur) => {
-          setScannerOuvert(false);
+          const cible = scannerCible;
+          setScannerCible(null);
+          if (cible === "ean") {
+            const article = await trouverArticleParEan(valeur);
+            if (!article) {
+              toast.error(`Aucun article actif avec l'EAN « ${valeur} ».`);
+              return;
+            }
+            setArticleId(article.id);
+            toast.success(`Article ${article.reference} sélectionné.`);
+            return;
+          }
           const emplacement = await trouverEmplacement(valeur);
           if (!emplacement) {
             toast.error(`Emplacement « ${valeur} » inconnu.`);
