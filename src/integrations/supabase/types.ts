@@ -16,20 +16,26 @@ export type Database = {
     Tables: {
       articles: {
         Row: {
+          actif: boolean
           created_at: string
           designation: string
+          ean: string | null
           id: string
           reference: string
         }
         Insert: {
+          actif?: boolean
           created_at?: string
           designation: string
+          ean?: string | null
           id?: string
           reference: string
         }
         Update: {
+          actif?: boolean
           created_at?: string
           designation?: string
+          ean?: string | null
           id?: string
           reference?: string
         }
@@ -37,18 +43,21 @@ export type Database = {
       }
       emplacements: {
         Row: {
+          actif: boolean
           code: string
           created_at: string
           id: string
           site_id: string
         }
         Insert: {
+          actif?: boolean
           code: string
           created_at?: string
           id?: string
           site_id: string
         }
         Update: {
+          actif?: boolean
           code?: string
           created_at?: string
           id?: string
@@ -170,6 +179,30 @@ export type Database = {
           },
         ]
       }
+      parametres_numerotation: {
+        Row: {
+          created_at: string
+          id: boolean
+          longueur: number
+          prefixe: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: boolean
+          longueur?: number
+          prefixe?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: boolean
+          longueur?: number
+          prefixe?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profils: {
         Row: {
           created_at: string
@@ -259,6 +292,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      prochain_numero_palette: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
