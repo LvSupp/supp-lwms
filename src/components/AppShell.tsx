@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Search, PackagePlus, MoveRight, History, LogOut } from "lucide-react";
+import { LayoutDashboard, Search, PackagePlus, MoveRight, History, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
@@ -42,6 +42,11 @@ export function AppShell({ titre, children }: { titre: string; children: ReactNo
           <span className="hidden max-w-28 truncate text-sm text-muted-foreground sm:block">
             {nom}
           </span>
+          <Button variant="ghost" size="icon" aria-label="Paramètres" asChild>
+            <Link to="/parametres">
+              <Settings className="size-5" />
+            </Link>
+          </Button>
           <Button
             variant="ghost"
             size="icon"

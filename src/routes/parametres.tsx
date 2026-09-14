@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Package, MapPin, Hash, Plus, Pencil, Power, Check, X } from "lucide-react";
+import { Package, MapPin, Hash, Pencil, Power } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -452,5 +452,3 @@ function messageErreur(error: unknown, champ: string) {
   if (message.toLowerCase().includes("duplicate")) return `Ce ${champ} existe déjà.`;
   return message;
 }
-
-export const Icones = { Plus, Check, X };

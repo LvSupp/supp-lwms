@@ -28,7 +28,11 @@ const PALETTE_SELECT =
   "id, numero, quantite, lot, statut, created_at, articles(reference, designation), emplacements(code, sites(nom))";
 
 export async function chargerArticles() {
-  const { data, error } = await supabase.from("articles").select("id, reference, designation").order("reference");
+  const { data, error } = await supabase
+    .from("articles")
+    .select("id, reference, designation")
+    .eq("actif", true)
+    .order("reference");
   if (error) throw error;
   return (data ?? []) as Article[];
 }
@@ -37,6 +41,7 @@ export async function chargerEmplacements() {
   const { data, error } = await supabase
     .from("emplacements")
     .select("id, code, site_id, sites(nom)")
+    .eq("actif", true)
     .order("code");
   if (error) throw error;
   return (data ?? []) as Emplacement[];

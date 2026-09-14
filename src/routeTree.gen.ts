@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreationRouteImport } from './routes/creation'
 import { Route as DeplacementRouteImport } from './routes/deplacement'
 import { Route as HistoriqueRouteImport } from './routes/historique'
+import { Route as ParametresRouteImport } from './routes/parametres'
 import { Route as RechercheRouteImport } from './routes/recherche'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,11 @@ const HistoriqueRoute = HistoriqueRouteImport.update({
   path: '/historique',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParametresRoute = ParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RechercheRoute = RechercheRouteImport.update({
   id: '/recherche',
   path: '/recherche',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/creation': typeof CreationRoute
   '/deplacement': typeof DeplacementRoute
   '/historique': typeof HistoriqueRoute
+  '/parametres': typeof ParametresRoute
   '/recherche': typeof RechercheRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/creation': typeof CreationRoute
   '/deplacement': typeof DeplacementRoute
   '/historique': typeof HistoriqueRoute
+  '/parametres': typeof ParametresRoute
   '/recherche': typeof RechercheRoute
 }
 export interface FileRoutesById {
@@ -70,15 +78,28 @@ export interface FileRoutesById {
   '/creation': typeof CreationRoute
   '/deplacement': typeof DeplacementRoute
   '/historique': typeof HistoriqueRoute
+  '/parametres': typeof ParametresRoute
   '/recherche': typeof RechercheRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/creation' | '/deplacement' | '/historique' | '/recherche'
+    | '/'
+    | '/auth'
+    | '/creation'
+    | '/deplacement'
+    | '/historique'
+    | '/parametres'
+    | '/recherche'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/creation' | '/deplacement' | '/historique' | '/recherche'
+    | '/'
+    | '/auth'
+    | '/creation'
+    | '/deplacement'
+    | '/historique'
+    | '/parametres'
+    | '/recherche'
   id:
     | '__root__'
     | '/'
@@ -86,6 +107,7 @@ export interface FileRouteTypes {
     | '/creation'
     | '/deplacement'
     | '/historique'
+    | '/parametres'
     | '/recherche'
   fileRoutesById: FileRoutesById
 }
@@ -95,6 +117,7 @@ export interface RootRouteChildren {
   CreationRoute: typeof CreationRoute
   DeplacementRoute: typeof DeplacementRoute
   HistoriqueRoute: typeof HistoriqueRoute
+  ParametresRoute: typeof ParametresRoute
   RechercheRoute: typeof RechercheRoute
 }
 
@@ -135,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoriqueRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/parametres': {
+      id: '/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof ParametresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recherche': {
       id: '/recherche'
       path: '/recherche'
@@ -151,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreationRoute: CreationRoute,
   DeplacementRoute: DeplacementRoute,
   HistoriqueRoute: HistoriqueRoute,
+  ParametresRoute: ParametresRoute,
   RechercheRoute: RechercheRoute,
 }
 export const routeTree = rootRouteImport
