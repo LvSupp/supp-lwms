@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreationRouteImport } from './routes/creation'
+import { Route as DeplacementRouteImport } from './routes/deplacement'
+import { Route as HistoriqueRouteImport } from './routes/historique'
 import { Route as RechercheRouteImport } from './routes/recherche'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +31,16 @@ const CreationRoute = CreationRouteImport.update({
   path: '/creation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeplacementRoute = DeplacementRouteImport.update({
+  id: '/deplacement',
+  path: '/deplacement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoriqueRoute = HistoriqueRouteImport.update({
+  id: '/historique',
+  path: '/historique',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RechercheRoute = RechercheRouteImport.update({
   id: '/recherche',
   path: '/recherche',
@@ -39,12 +51,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/creation': typeof CreationRoute
+  '/deplacement': typeof DeplacementRoute
+  '/historique': typeof HistoriqueRoute
   '/recherche': typeof RechercheRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/creation': typeof CreationRoute
+  '/deplacement': typeof DeplacementRoute
+  '/historique': typeof HistoriqueRoute
   '/recherche': typeof RechercheRoute
 }
 export interface FileRoutesById {
@@ -52,20 +68,33 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/creation': typeof CreationRoute
+  '/deplacement': typeof DeplacementRoute
+  '/historique': typeof HistoriqueRoute
   '/recherche': typeof RechercheRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/creation' | '/recherche'
+  fullPaths:
+    '/' | '/auth' | '/creation' | '/deplacement' | '/historique' | '/recherche'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/creation' | '/recherche'
-  id: '__root__' | '/' | '/auth' | '/creation' | '/recherche'
+  to:
+    '/' | '/auth' | '/creation' | '/deplacement' | '/historique' | '/recherche'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/creation'
+    | '/deplacement'
+    | '/historique'
+    | '/recherche'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   CreationRoute: typeof CreationRoute
+  DeplacementRoute: typeof DeplacementRoute
+  HistoriqueRoute: typeof HistoriqueRoute
   RechercheRoute: typeof RechercheRoute
 }
 
@@ -92,6 +121,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/deplacement': {
+      id: '/deplacement'
+      path: '/deplacement'
+      fullPath: '/deplacement'
+      preLoaderRoute: typeof DeplacementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/historique': {
+      id: '/historique'
+      path: '/historique'
+      fullPath: '/historique'
+      preLoaderRoute: typeof HistoriqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recherche': {
       id: '/recherche'
       path: '/recherche'
@@ -106,6 +149,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   CreationRoute: CreationRoute,
+  DeplacementRoute: DeplacementRoute,
+  HistoriqueRoute: HistoriqueRoute,
   RechercheRoute: RechercheRoute,
 }
 export const routeTree = rootRouteImport
