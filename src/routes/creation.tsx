@@ -21,6 +21,7 @@ import {
   creerPalette,
   trouverEmplacement,
 } from "@/lib/stock";
+import { trouverArticleParEan } from "@/lib/parametres";
 
 export const Route = createFileRoute("/creation")({
   head: () => ({
@@ -50,7 +51,7 @@ function PageCreation() {
   const [quantite, setQuantite] = useState("1");
   const [lot, setLot] = useState("");
   const [emplacementId, setEmplacementId] = useState("");
-  const [scannerOuvert, setScannerOuvert] = useState(false);
+  const [scannerCible, setScannerCible] = useState<"emplacement" | "ean" | null>(null);
   const [enCours, setEnCours] = useState(false);
   const [creee, setCreee] = useState<string | null>(null);
 
@@ -110,7 +111,9 @@ function PageCreation() {
               ))}
             </SelectContent>
           </Select>
+          <BoutonScanner onClick={() => setScannerCible("ean")} label="Scanner un code EAN" />
         </div>
+
 
         <div className="space-y-2">
           <Label htmlFor="quantite">Quantité</Label>
@@ -151,7 +154,7 @@ function PageCreation() {
             </SelectContent>
           </Select>
           <BoutonScanner
-            onClick={() => setScannerOuvert(true)}
+            onClick={() => setScannerCible("emplacement")}
             label="Scanner l'emplacement"
           />
         </div>
@@ -166,11 +169,22 @@ function PageCreation() {
       </form>
 
       <ScannerDialog
-        open={scannerOuvert}
-        titre="Scanner l'emplacement"
-        onClose={() => setScannerOuvert(false)}
+        open={scannerCible !== null}
+        titre={scannerCible === "ean" ? "Scanner le code EAN" : "Scanner l'emplacement"}
+        onClose={() => setScannerCible(null)}
         onResult={async (valeur) => {
-          setScannerOuvert(false);
+          const cible = scannerCible;
+          setScannerCible(null);
+          if (cible === "ean") {
+            const article = await trouverArticleParEan(valeur);
+            if (!article) {
+              toast.error(`Aucun article actif avec l'EAN « ${valeur} ».`);
+              return;
+            }
+            setArticleId(article.id);
+            toast.success(`Article ${article.reference} sélectionné.`);
+            return;
+          }
           const emplacement = await trouverEmplacement(valeur);
           if (!emplacement) {
             toast.error(`Emplacement « ${valeur} » inconnu.`);
