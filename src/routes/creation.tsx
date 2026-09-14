@@ -21,6 +21,7 @@ import {
   creerPalette,
   trouverEmplacement,
 } from "@/lib/stock";
+import { trouverArticleParEan } from "@/lib/parametres";
 
 export const Route = createFileRoute("/creation")({
   head: () => ({
