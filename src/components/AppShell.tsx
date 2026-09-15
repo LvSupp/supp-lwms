@@ -1,12 +1,12 @@
 import { useEffect, type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Search, PackagePlus, MoveRight, History, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, Boxes, PackagePlus, MoveRight, History, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 const nav = [
   { to: "/", label: "Accueil", icon: LayoutDashboard },
-  { to: "/recherche", label: "Rechercher", icon: Search },
+  { to: "/recherche", label: "Stock", icon: Boxes },
   { to: "/creation", label: "Créer", icon: PackagePlus },
   { to: "/deplacement", label: "Déplacer", icon: MoveRight },
   { to: "/historique", label: "Historique", icon: History },
