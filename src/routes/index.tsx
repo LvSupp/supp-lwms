@@ -63,7 +63,7 @@ function PageAccueil() {
       </div>
 
       <div className="mt-6 grid gap-3">
-        <Raccourci to="/recherche" icone={<Search className="size-5" />} label="Rechercher une palette" />
+        <Raccourci to="/recherche" icone={<Search className="size-5" />} label="Consulter le stock" />
         <Raccourci to="/deplacement" icone={<MoveRight className="size-5" />} label="Déplacer une palette" />
         <Raccourci to="/creation" icone={<PackagePlus className="size-5" />} label="Créer une palette" />
       </div>
