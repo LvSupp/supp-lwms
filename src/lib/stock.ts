@@ -135,6 +135,139 @@ export async function chargerStats() {
   };
 }
 
+/* ---------------- Vue stock ---------------- */
+
+export type LigneStock = {
+  article_id: string;
+  reference: string;
+  designation: string;
+  quantite_totale: number;
+  nb_palettes: number;
+};
+
+export type PaletteLigne = {
+  id: string;
+  numero: string;
+  quantite: number;
+  lot: string | null;
+  article_id: string;
+  emplacement_id: string | null;
+  articles: { reference: string; designation: string } | null;
+  emplacements: { id: string; code: string } | null;
+};
+
+const LIGNE_SELECT =
+  "id, numero, quantite, lot, article_id, emplacement_id, articles(reference, designation), emplacements(id, code)";
+
+async function chargerPalettesLignes(filtre?: (q: any) => any) {
+  let requete = supabase.from("palettes").select(LIGNE_SELECT).order("numero");
+  if (filtre) requete = filtre(requete);
+  const { data, error } = await requete;
+  if (error) throw error;
+  return (data ?? []) as unknown as PaletteLigne[];
+}
+
+/** Stock agrégé par article : somme des quantités des palettes et nombre de palettes. */
+export async function chargerStockParArticle(): Promise<LigneStock[]> {
+  const lignes = await chargerPalettesLignes();
+  const parArticle = new Map<string, LigneStock>();
+  for (const l of lignes) {
+    const courant =
+      parArticle.get(l.article_id) ??
+      {
+        article_id: l.article_id,
+        reference: l.articles?.reference ?? "—",
+        designation: l.articles?.designation ?? "",
+        quantite_totale: 0,
+        nb_palettes: 0,
+      };
+    courant.quantite_totale += l.quantite;
+    courant.nb_palettes += 1;
+    parArticle.set(l.article_id, courant);
+  }
+  return [...parArticle.values()].sort((a, b) => a.reference.localeCompare(b.reference));
+}
+
+export async function chargerPalettesArticle(article_id: string) {
+  return chargerPalettesLignes((q) => q.eq("article_id", article_id));
+}
+
+export async function chargerPalettesEmplacement(emplacement_id: string) {
+  return chargerPalettesLignes((q) => q.eq("emplacement_id", emplacement_id));
+}
+
+export async function chargerArticle(id: string) {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("id, reference, designation")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as Article | null) ?? null;
+}
+
+export async function chargerEmplacement(id: string) {
+  const { data, error } = await supabase
+    .from("emplacements")
+    .select("id, code, site_id, sites(nom)")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as Emplacement | null) ?? null;
+}
+
+export async function chargerPalette(id: string) {
+  const { data, error } = await supabase
+    .from("palettes")
+    .select("id, numero, quantite, lot, statut, created_at, emplacement_id, article_id, articles(reference, designation), emplacements(id, code, sites(nom))")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as unknown as (PaletteDetail & { emplacement_id: string | null; article_id: string }) | null) ?? null;
+}
+
+export async function chargerMouvementsPalette(palette_id: string) {
+  const { data, error } = await supabase
+    .from("mouvements")
+    .select(
+      "id, created_at, type, utilisateur_nom, palettes(numero), source:source_id(code), destination:destination_id(code)",
+    )
+    .eq("palette_id", palette_id)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as Mouvement[];
+}
+
+export type ResultatsRecherche = {
+  articles: LigneStock[];
+  palettes: PaletteLigne[];
+  emplacements: Emplacement[];
+};
+
+/** Recherche libre : article, référence, numéro de palette ou code emplacement. */
+export async function rechercheGlobale(terme: string): Promise<ResultatsRecherche> {
+  const q = terme.trim();
+  if (!q) return { articles: [], palettes: [], emplacements: [] };
+  const motif = `%${q}%`;
+
+  const [stock, palettes, emplacements] = await Promise.all([
+    chargerStockParArticle(),
+    chargerPalettesLignes((r) => r.ilike("numero", motif)),
+    supabase.from("emplacements").select("id, code, site_id, sites(nom)").ilike("code", motif).order("code"),
+  ]);
+  if (emplacements.error) throw emplacements.error;
+
+  const bas = q.toLowerCase();
+  return {
+    articles: stock.filter(
+      (a) =>
+        a.reference.toLowerCase().includes(bas) || a.designation.toLowerCase().includes(bas),
+    ),
+    palettes,
+    emplacements: (emplacements.data ?? []) as Emplacement[],
+  };
+}
+
 export function formaterDate(iso: string) {
   return new Date(iso).toLocaleString("fr-FR", {
     day: "2-digit",

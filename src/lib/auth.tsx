@@ -25,18 +25,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
-      setLoading(false);
+      if (next) setLoading(false);
     });
-    supabase.auth.getSession().then(({ data: { session: current } }) => {
-      setSession(current);
+    void (async () => {
+      const { data: { session: current } } = await supabase.auth.getSession();
+      if (current) {
+        setSession(current);
+        setLoading(false);
+        return;
+      }
+      // Accès direct : ouverture d'une session invité, sans création de compte.
+      const { data: invite } = await supabase.auth.signInAnonymously();
+      setSession(invite?.session ?? null);
       setLoading(false);
-    });
+    })();
     return () => data.subscription.unsubscribe();
   }, []);
 
   const user = session?.user ?? null;
   const nom =
-    (user?.user_metadata?.["nom"] as string | undefined) ?? user?.email?.split("@")[0] ?? "";
+    (user?.user_metadata?.["nom"] as string | undefined) ??
+    user?.email?.split("@")[0] ??
+    (user ? "Invité" : "");
 
   return (
     <AuthContext.Provider
