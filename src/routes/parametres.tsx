@@ -254,6 +254,12 @@ function SectionEmplacements() {
   const [code, setCode] = useState("");
   const [siteId, setSiteId] = useState("");
   const [enCours, setEnCours] = useState(false);
+  const [proposition, setProposition] = useState<string | null>(null);
+  const [etiquettes, setEtiquettes] = useState<string[]>([]);
+  const [selection, setSelection] = useState<string[]>([]);
+
+  const basculerSelection = (codeEmpl: string) =>
+    setSelection((s) => (s.includes(codeEmpl) ? s.filter((c) => c !== codeEmpl) : [...s, codeEmpl]));
 
   const reinitialiser = () => {
     setEdition(null);
@@ -280,6 +286,7 @@ function SectionEmplacements() {
       } else {
         await creerEmplacement({ code, site_id: siteId });
         toast.success("Emplacement créé.");
+        if (demanderEtiquette("emplacement")) setProposition(code.trim());
       }
       reinitialiser();
       rafraichir();
