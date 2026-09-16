@@ -17,6 +17,7 @@ import {
   formaterDate,
   rechercheGlobale,
 } from "@/lib/stock";
+import { BoutonEtiquette, DialogEtiquette } from "@/components/Etiquette";
 
 export const Route = createFileRoute("/recherche")({
   head: () => ({
@@ -326,12 +327,24 @@ function DetailPalette({
     queryFn: () => chargerMouvementsPalette(id),
   });
   const p = palette.data;
+  const [etiquette, setEtiquette] = useState(false);
 
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-border bg-card p-4 shadow-(--shadow-panel)">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">Palette</p>
-        <p className="font-display text-3xl leading-none">{p?.numero ?? "—"}</p>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Palette</p>
+            <p className="font-display text-3xl leading-none">{p?.numero ?? "—"}</p>
+          </div>
+          {p && <BoutonEtiquette onClick={() => setEtiquette(true)} />}
+        </div>
+        <DialogEtiquette
+          open={etiquette && !!p}
+          valeurs={p ? [p.numero] : []}
+          titre={`Étiquette ${p?.numero ?? ""}`}
+          onClose={() => setEtiquette(false)}
+        />
         <dl className="mt-4 space-y-3 text-sm">
           <Ligne libelle="Article">
             {p ? (
