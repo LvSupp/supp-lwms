@@ -30,6 +30,14 @@ import {
   modifierEmplacement,
   prochainNumero,
 } from "@/lib/parametres";
+import {
+  BoutonEtiquette,
+  DialogEtiquette,
+  DialogPropositionEtiquette,
+} from "@/components/Etiquette";
+import { definirDemandeEtiquette, demanderEtiquette } from "@/lib/preferences";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/parametres")({
   head: () => ({
