@@ -22,6 +22,12 @@ import {
   trouverEmplacement,
 } from "@/lib/stock";
 import { trouverArticleParEan } from "@/lib/parametres";
+import {
+  BoutonEtiquette,
+  DialogEtiquette,
+  DialogPropositionEtiquette,
+} from "@/components/Etiquette";
+import { demanderEtiquette } from "@/lib/preferences";
 
 export const Route = createFileRoute("/creation")({
   head: () => ({
@@ -54,6 +60,8 @@ function PageCreation() {
   const [scannerCible, setScannerCible] = useState<"emplacement" | "ean" | null>(null);
   const [enCours, setEnCours] = useState(false);
   const [creee, setCreee] = useState<string | null>(null);
+  const [proposition, setProposition] = useState<string | null>(null);
+  const [etiquette, setEtiquette] = useState<string | null>(null);
 
   const valider = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +78,7 @@ function PageCreation() {
         emplacement_id: emplacementId,
       });
       setCreee(palette.numero);
+      if (demanderEtiquette("palette")) setProposition(palette.numero);
       setQuantite("1");
       setLot("");
       void queryClient.invalidateQueries();
@@ -86,13 +95,14 @@ function PageCreation() {
       {creee && (
         <div className="mb-4 flex items-start gap-3 rounded-xl border border-border bg-card p-4">
           <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="font-semibold">Palette créée</p>
             <p className="font-display text-3xl leading-none">{creee}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Notez ce numéro sur l'étiquette de la palette.
             </p>
           </div>
+          <BoutonEtiquette onClick={() => setEtiquette(creee)} />
         </div>
       )}
 
@@ -193,6 +203,20 @@ function PageCreation() {
           setEmplacementId(emplacement.id);
           toast.success(`Emplacement ${emplacement.code} sélectionné.`);
         }}
+      />
+
+      <DialogPropositionEtiquette
+        open={proposition !== null}
+        type="palette"
+        valeur={proposition ?? ""}
+        onClose={() => setProposition(null)}
+      />
+
+      <DialogEtiquette
+        open={etiquette !== null}
+        valeurs={etiquette ? [etiquette] : []}
+        titre={`Étiquette ${etiquette ?? ""}`}
+        onClose={() => setEtiquette(null)}
       />
     </AppShell>
   );
