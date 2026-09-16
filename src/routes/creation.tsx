@@ -22,6 +22,12 @@ import {
   trouverEmplacement,
 } from "@/lib/stock";
 import { trouverArticleParEan } from "@/lib/parametres";
+import {
+  BoutonEtiquette,
+  DialogEtiquette,
+  DialogPropositionEtiquette,
+} from "@/components/Etiquette";
+import { demanderEtiquette } from "@/lib/preferences";
 
 export const Route = createFileRoute("/creation")({
   head: () => ({
@@ -54,6 +60,8 @@ function PageCreation() {
   const [scannerCible, setScannerCible] = useState<"emplacement" | "ean" | null>(null);
   const [enCours, setEnCours] = useState(false);
   const [creee, setCreee] = useState<string | null>(null);
+  const [proposition, setProposition] = useState<string | null>(null);
+  const [etiquette, setEtiquette] = useState<string | null>(null);
 
   const valider = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +78,7 @@ function PageCreation() {
         emplacement_id: emplacementId,
       });
       setCreee(palette.numero);
+      if (demanderEtiquette("palette")) setProposition(palette.numero);
       setQuantite("1");
       setLot("");
       void queryClient.invalidateQueries();
