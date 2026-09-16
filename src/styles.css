@@ -126,3 +126,38 @@
     letter-spacing: 0.01em;
   }
 }
+
+/* Impression des étiquettes QR : seule la zone d'impression est visible. */
+.zone-impression {
+  display: none;
+}
+
+@media print {
+  body > *:not(.zone-impression) {
+    display: none !important;
+  }
+
+  .zone-impression {
+    display: block !important;
+    background: #ffffff;
+  }
+
+  .etiquette-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12mm;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .etiquette-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .etiquette {
+    background: #ffffff;
+    color: #000000;
+  }
+}
