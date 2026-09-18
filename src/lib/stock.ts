@@ -1,6 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type Emplacement = { id: string; code: string; site_id: string; sites?: { nom: string } | null };
+export type Emplacement = {
+  id: string;
+  code: string;
+  site_id: string;
+  capacite_max: number | null;
+  type_emplacement: string;
+  sites?: { nom: string } | null;
+};
+
+const EMPLACEMENT_SELECT = "id, code, site_id, capacite_max, type_emplacement, sites(nom)";
 export type Article = { id: string; reference: string; designation: string };
 
 export type PaletteDetail = {
