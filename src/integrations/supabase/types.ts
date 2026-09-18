@@ -44,24 +44,30 @@ export type Database = {
       emplacements: {
         Row: {
           actif: boolean
+          capacite_max: number | null
           code: string
           created_at: string
           id: string
           site_id: string
+          type_emplacement: string
         }
         Insert: {
           actif?: boolean
+          capacite_max?: number | null
           code: string
           created_at?: string
           id?: string
           site_id: string
+          type_emplacement?: string
         }
         Update: {
           actif?: boolean
+          capacite_max?: number | null
           code?: string
           created_at?: string
           id?: string
           site_id?: string
+          type_emplacement?: string
         }
         Relationships: [
           {
@@ -248,12 +254,7 @@ export type Database = {
     }
     Functions: {
       creer_palette: {
-        Args: {
-          p_article_id: string
-          p_emplacement_id: string
-          p_lot: string
-          p_quantite: number
-        }
+        Args: { p_article_id: string; p_lot: string; p_quantite: number }
         Returns: {
           article_id: string
           created_at: string
@@ -292,6 +293,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      emplacement_reception: { Args: never; Returns: string }
       prochain_numero_palette: { Args: never; Returns: string }
     }
     Enums: {
