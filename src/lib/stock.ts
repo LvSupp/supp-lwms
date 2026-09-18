@@ -49,7 +49,7 @@ export async function chargerArticles() {
 export async function chargerEmplacements() {
   const { data, error } = await supabase
     .from("emplacements")
-    .select("id, code, site_id, sites(nom)")
+    .select(EMPLACEMENT_SELECT)
     .eq("actif", true)
     .order("code");
   if (error) throw error;
@@ -80,7 +80,7 @@ export async function trouverEmplacement(code: string) {
   if (!valeur) return null;
   const { data, error } = await supabase
     .from("emplacements")
-    .select("id, code, site_id, sites(nom)")
+    .select(EMPLACEMENT_SELECT)
     .ilike("code", valeur)
     .maybeSingle();
   if (error) throw error;
@@ -218,7 +218,7 @@ export async function chargerArticle(id: string) {
 export async function chargerEmplacement(id: string) {
   const { data, error } = await supabase
     .from("emplacements")
-    .select("id, code, site_id, sites(nom)")
+    .select(EMPLACEMENT_SELECT)
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
@@ -262,7 +262,7 @@ export async function rechercheGlobale(terme: string): Promise<ResultatsRecherch
   const [stock, palettes, emplacements] = await Promise.all([
     chargerStockParArticle(),
     chargerPalettesLignes((r) => r.ilike("numero", motif)),
-    supabase.from("emplacements").select("id, code, site_id, sites(nom)").ilike("code", motif).order("code"),
+    supabase.from("emplacements").select(EMPLACEMENT_SELECT).ilike("code", motif).order("code"),
   ]);
   if (emplacements.error) throw emplacements.error;
 
