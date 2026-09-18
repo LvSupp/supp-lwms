@@ -1,6 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type Emplacement = { id: string; code: string; site_id: string; sites?: { nom: string } | null };
+export type Emplacement = {
+  id: string;
+  code: string;
+  site_id: string;
+  capacite_max: number | null;
+  type_emplacement: string;
+  sites?: { nom: string } | null;
+};
+
+const EMPLACEMENT_SELECT = "id, code, site_id, capacite_max, type_emplacement, sites(nom)";
 export type Article = { id: string; reference: string; designation: string };
 
 export type PaletteDetail = {
@@ -40,7 +49,7 @@ export async function chargerArticles() {
 export async function chargerEmplacements() {
   const { data, error } = await supabase
     .from("emplacements")
-    .select("id, code, site_id, sites(nom)")
+    .select(EMPLACEMENT_SELECT)
     .eq("actif", true)
     .order("code");
   if (error) throw error;
@@ -71,27 +80,52 @@ export async function trouverEmplacement(code: string) {
   if (!valeur) return null;
   const { data, error } = await supabase
     .from("emplacements")
-    .select("id, code, site_id, sites(nom)")
+    .select(EMPLACEMENT_SELECT)
     .ilike("code", valeur)
     .maybeSingle();
   if (error) throw error;
   return (data as Emplacement | null) ?? null;
 }
 
+/** Crée une palette : la base l'affecte automatiquement à l'emplacement de Réception. */
 export async function creerPalette(params: {
   article_id: string;
   quantite: number;
   lot: string;
-  emplacement_id: string;
 }) {
   const { data, error } = await supabase.rpc("creer_palette", {
     p_article_id: params.article_id,
     p_quantite: params.quantite,
     p_lot: params.lot,
-    p_emplacement_id: params.emplacement_id,
   });
   if (error) throw error;
   return data as { id: string; numero: string };
+}
+
+/** Emplacement de Réception actif, identifié par son type (jamais par son libellé). */
+export async function chargerReception() {
+  const { data, error } = await supabase
+    .from("emplacements")
+    .select(EMPLACEMENT_SELECT)
+    .eq("type_emplacement", "RECEPTION")
+    .eq("actif", true)
+    .order("created_at")
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as Emplacement | null) ?? null;
+}
+
+/** Libellé d'occupation d'un emplacement : « 1 / 1 palette » ou « 12 palettes ». */
+export function libelleOccupation(capacite_max: number | null, occupation: number) {
+  const pluriel = occupation > 1 ? "s" : "";
+  if (capacite_max === null) return `${occupation} palette${pluriel}`;
+  return `${occupation} / ${capacite_max} palette${capacite_max > 1 ? "s" : ""}`;
+}
+
+export function etatOccupation(capacite_max: number | null, occupation: number) {
+  if (capacite_max === null) return "Capacité illimitée" as const;
+  return occupation >= capacite_max ? ("Complet" as const) : ("Disponible" as const);
 }
 
 export async function deplacerPalette(palette_id: string, destination_id: string) {
@@ -209,7 +243,7 @@ export async function chargerArticle(id: string) {
 export async function chargerEmplacement(id: string) {
   const { data, error } = await supabase
     .from("emplacements")
-    .select("id, code, site_id, sites(nom)")
+    .select(EMPLACEMENT_SELECT)
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
@@ -253,7 +287,7 @@ export async function rechercheGlobale(terme: string): Promise<ResultatsRecherch
   const [stock, palettes, emplacements] = await Promise.all([
     chargerStockParArticle(),
     chargerPalettesLignes((r) => r.ilike("numero", motif)),
-    supabase.from("emplacements").select("id, code, site_id, sites(nom)").ilike("code", motif).order("code"),
+    supabase.from("emplacements").select(EMPLACEMENT_SELECT).ilike("code", motif).order("code"),
   ]);
   if (emplacements.error) throw emplacements.error;
 
