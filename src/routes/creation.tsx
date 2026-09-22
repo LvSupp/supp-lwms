@@ -75,7 +75,6 @@ function PageCreation() {
         article_id: articleId,
         quantite: Number(quantite),
         lot,
-        emplacement_id: emplacementId,
       });
       setCreee(palette.numero);
       if (demanderEtiquette("palette")) setProposition(palette.numero);
