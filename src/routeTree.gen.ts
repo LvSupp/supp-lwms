@@ -15,6 +15,7 @@ import { Route as CreationRouteImport } from './routes/creation'
 import { Route as DeplacementRouteImport } from './routes/deplacement'
 import { Route as HistoriqueRouteImport } from './routes/historique'
 import { Route as ParametresRouteImport } from './routes/parametres'
+import { Route as ReceptionRouteImport } from './routes/reception'
 import { Route as RechercheRouteImport } from './routes/recherche'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const ParametresRoute = ParametresRouteImport.update({
   path: '/parametres',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReceptionRoute = ReceptionRouteImport.update({
+  id: '/reception',
+  path: '/reception',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RechercheRoute = RechercheRouteImport.update({
   id: '/recherche',
   path: '/recherche',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/deplacement': typeof DeplacementRoute
   '/historique': typeof HistoriqueRoute
   '/parametres': typeof ParametresRoute
+  '/reception': typeof ReceptionRoute
   '/recherche': typeof RechercheRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/deplacement': typeof DeplacementRoute
   '/historique': typeof HistoriqueRoute
   '/parametres': typeof ParametresRoute
+  '/reception': typeof ReceptionRoute
   '/recherche': typeof RechercheRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/deplacement': typeof DeplacementRoute
   '/historique': typeof HistoriqueRoute
   '/parametres': typeof ParametresRoute
+  '/reception': typeof ReceptionRoute
   '/recherche': typeof RechercheRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/deplacement'
     | '/historique'
     | '/parametres'
+    | '/reception'
     | '/recherche'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/deplacement'
     | '/historique'
     | '/parametres'
+    | '/reception'
     | '/recherche'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/deplacement'
     | '/historique'
     | '/parametres'
+    | '/reception'
     | '/recherche'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   DeplacementRoute: typeof DeplacementRoute
   HistoriqueRoute: typeof HistoriqueRoute
   ParametresRoute: typeof ParametresRoute
+  ReceptionRoute: typeof ReceptionRoute
   RechercheRoute: typeof RechercheRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParametresRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reception': {
+      id: '/reception'
+      path: '/reception'
+      fullPath: '/reception'
+      preLoaderRoute: typeof ReceptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recherche': {
       id: '/recherche'
       path: '/recherche'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeplacementRoute: DeplacementRoute,
   HistoriqueRoute: HistoriqueRoute,
   ParametresRoute: ParametresRoute,
+  ReceptionRoute: ReceptionRoute,
   RechercheRoute: RechercheRoute,
 }
 export const routeTree = rootRouteImport
