@@ -1,13 +1,13 @@
 import { useEffect, type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Boxes, PackagePlus, MoveRight, History, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, Boxes, Truck, MoveRight, History, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 const nav = [
   { to: "/", label: "Accueil", icon: LayoutDashboard },
   { to: "/recherche", label: "Stock", icon: Boxes },
-  { to: "/creation", label: "Créer", icon: PackagePlus },
+  { to: "/reception", label: "Réception", icon: Truck },
   { to: "/deplacement", label: "Déplacer", icon: MoveRight },
   { to: "/historique", label: "Historique", icon: History },
 ] as const;
