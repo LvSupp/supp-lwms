@@ -134,38 +134,83 @@ export type Database = {
           },
         ]
       }
-      palettes: {
+      palette_contenus: {
         Row: {
           article_id: string
+          created_at: string
+          id: string
+          palette_id: string
+          quantite: number
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          id?: string
+          palette_id: string
+          quantite: number
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          id?: string
+          palette_id?: string
+          quantite?: number
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "palette_contenus_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "palette_contenus_palette_id_fkey"
+            columns: ["palette_id"]
+            isOneToOne: false
+            referencedRelation: "palettes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      palettes: {
+        Row: {
+          article_id: string | null
           created_at: string
           created_by: string | null
           emplacement_id: string | null
           id: string
           lot: string | null
           numero: string
-          quantite: number
+          quantite: number | null
           statut: string
         }
         Insert: {
-          article_id: string
+          article_id?: string | null
           created_at?: string
           created_by?: string | null
           emplacement_id?: string | null
           id?: string
           lot?: string | null
           numero: string
-          quantite?: number
+          quantite?: number | null
           statut?: string
         }
         Update: {
-          article_id?: string
+          article_id?: string | null
           created_at?: string
           created_by?: string | null
           emplacement_id?: string | null
           id?: string
           lot?: string | null
           numero?: string
-          quantite?: number
+          quantite?: number | null
           statut?: string
         }
         Relationships: [
@@ -256,14 +301,34 @@ export type Database = {
       creer_palette: {
         Args: { p_article_id: string; p_lot: string; p_quantite: number }
         Returns: {
-          article_id: string
+          article_id: string | null
           created_at: string
           created_by: string | null
           emplacement_id: string | null
           id: string
           lot: string | null
           numero: string
-          quantite: number
+          quantite: number | null
+          statut: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "palettes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      creer_palette_multi: {
+        Args: { p_lignes: Json; p_numero: string }
+        Returns: {
+          article_id: string | null
+          created_at: string
+          created_by: string | null
+          emplacement_id: string | null
+          id: string
+          lot: string | null
+          numero: string
+          quantite: number | null
           statut: string
         }
         SetofOptions: {
@@ -276,14 +341,14 @@ export type Database = {
       deplacer_palette: {
         Args: { p_destination_id: string; p_palette_id: string }
         Returns: {
-          article_id: string
+          article_id: string | null
           created_at: string
           created_by: string | null
           emplacement_id: string | null
           id: string
           lot: string | null
           numero: string
-          quantite: number
+          quantite: number | null
           statut: string
         }
         SetofOptions: {
