@@ -12,32 +12,16 @@ export type Emplacement = {
 const EMPLACEMENT_SELECT = "id, code, site_id, capacite_max, type_emplacement, sites(nom)";
 export type Article = { id: string; reference: string; designation: string };
 
-/** Une ligne de contenu : une référence article présente sur une palette. */
-export type Contenu = {
-  id: string;
-  article_id: string;
-  quantite: number;
-  statut: string;
-  articles: { reference: string; designation: string } | null;
-};
-
-/** Palette multi-références avec sa localisation et son contenu. */
-export type PaletteLigne = {
+export type PaletteDetail = {
   id: string;
   numero: string;
+  quantite: number;
+  lot: string | null;
   statut: string;
   created_at: string;
-  emplacement_id: string | null;
-  emplacements: {
-    id: string;
-    code: string;
-    type_emplacement: string;
-    sites: { nom: string } | null;
-  } | null;
-  palette_contenus: Contenu[];
+  articles: { reference: string; designation: string } | null;
+  emplacements: { code: string; sites: { nom: string } | null } | null;
 };
-
-export type PaletteDetail = PaletteLigne;
 
 export type Mouvement = {
   id: string;
@@ -50,13 +34,7 @@ export type Mouvement = {
 };
 
 const PALETTE_SELECT =
-  "id, numero, statut, created_at, emplacement_id, emplacements(id, code, type_emplacement, sites(nom)), palette_contenus(id, article_id, quantite, statut, articles(reference, designation))";
-
-export const quantiteTotale = (p: PaletteLigne) =>
-  p.palette_contenus.reduce((s, c) => s + c.quantite, 0);
-
-export const libelleZone = (e: PaletteLigne["emplacements"]) =>
-  !e ? "Non affectée" : e.type_emplacement === "RECEPTION" ? "Réception" : "Stock";
+  "id, numero, quantite, lot, statut, created_at, articles(reference, designation), emplacements(code, sites(nom))";
 
 export async function chargerArticles() {
   const { data, error } = await supabase
@@ -84,7 +62,7 @@ export async function chargerSites() {
   return (data ?? []) as { id: string; nom: string }[];
 }
 
-/** Recherche une palette par son code (issu du scan ou d'une saisie manuelle). */
+/** Recherche une palette par son numéro (issu du scan ou d'une saisie manuelle). */
 export async function trouverPalette(numero: string) {
   const valeur = numero.trim();
   if (!valeur) return null;
@@ -94,7 +72,7 @@ export async function trouverPalette(numero: string) {
     .ilike("numero", valeur)
     .maybeSingle();
   if (error) throw error;
-  return (data as unknown as PaletteLigne | null) ?? null;
+  return (data as PaletteDetail | null) ?? null;
 }
 
 export async function trouverEmplacement(code: string) {
@@ -109,18 +87,16 @@ export async function trouverEmplacement(code: string) {
   return (data as Emplacement | null) ?? null;
 }
 
-/**
- * Crée une palette multi-références en une seule transaction :
- * palette + contenus + affectation en Réception + mouvement d'entrée.
- * Code vide = numéro généré automatiquement.
- */
-export async function creerPaletteMulti(params: {
-  numero: string;
-  lignes: { article_id: string; quantite: number }[];
+/** Crée une palette : la base l'affecte automatiquement à l'emplacement de Réception. */
+export async function creerPalette(params: {
+  article_id: string;
+  quantite: number;
+  lot: string;
 }) {
-  const { data, error } = await supabase.rpc("creer_palette_multi", {
-    p_numero: params.numero,
-    p_lignes: params.lignes,
+  const { data, error } = await supabase.rpc("creer_palette", {
+    p_article_id: params.article_id,
+    p_quantite: params.quantite,
+    p_lot: params.lot,
   });
   if (error) throw error;
   return data as { id: string; numero: string };
@@ -203,47 +179,55 @@ export type LigneStock = {
   nb_palettes: number;
 };
 
-/** Toutes les palettes avec leur contenu (volumétrie de démonstration). */
-export async function chargerToutesPalettes() {
-  const { data, error } = await supabase.from("palettes").select(PALETTE_SELECT).order("numero");
+export type PaletteLigne = {
+  id: string;
+  numero: string;
+  quantite: number;
+  lot: string | null;
+  article_id: string;
+  emplacement_id: string | null;
+  articles: { reference: string; designation: string } | null;
+  emplacements: { id: string; code: string } | null;
+};
+
+const LIGNE_SELECT =
+  "id, numero, quantite, lot, article_id, emplacement_id, articles(reference, designation), emplacements(id, code)";
+
+async function chargerPalettesLignes(filtre?: (q: any) => any) {
+  let requete = supabase.from("palettes").select(LIGNE_SELECT).order("numero");
+  if (filtre) requete = filtre(requete);
+  const { data, error } = await requete;
   if (error) throw error;
   return (data ?? []) as unknown as PaletteLigne[];
 }
 
-/** Stock agrégé par article : somme des quantités des contenus et nombre de palettes. */
+/** Stock agrégé par article : somme des quantités des palettes et nombre de palettes. */
 export async function chargerStockParArticle(): Promise<LigneStock[]> {
-  const palettes = await chargerToutesPalettes();
+  const lignes = await chargerPalettesLignes();
   const parArticle = new Map<string, LigneStock>();
-  for (const p of palettes) {
-    for (const c of p.palette_contenus) {
-      const courant = parArticle.get(c.article_id) ?? {
-        article_id: c.article_id,
-        reference: c.articles?.reference ?? "—",
-        designation: c.articles?.designation ?? "",
+  for (const l of lignes) {
+    const courant =
+      parArticle.get(l.article_id) ??
+      {
+        article_id: l.article_id,
+        reference: l.articles?.reference ?? "—",
+        designation: l.articles?.designation ?? "",
         quantite_totale: 0,
         nb_palettes: 0,
       };
-      courant.quantite_totale += c.quantite;
-      courant.nb_palettes += 1;
-      parArticle.set(c.article_id, courant);
-    }
+    courant.quantite_totale += l.quantite;
+    courant.nb_palettes += 1;
+    parArticle.set(l.article_id, courant);
   }
   return [...parArticle.values()].sort((a, b) => a.reference.localeCompare(b.reference));
 }
 
 export async function chargerPalettesArticle(article_id: string) {
-  const palettes = await chargerToutesPalettes();
-  return palettes.filter((p) => p.palette_contenus.some((c) => c.article_id === article_id));
+  return chargerPalettesLignes((q) => q.eq("article_id", article_id));
 }
 
 export async function chargerPalettesEmplacement(emplacement_id: string) {
-  const { data, error } = await supabase
-    .from("palettes")
-    .select(PALETTE_SELECT)
-    .eq("emplacement_id", emplacement_id)
-    .order("numero");
-  if (error) throw error;
-  return (data ?? []) as unknown as PaletteLigne[];
+  return chargerPalettesLignes((q) => q.eq("emplacement_id", emplacement_id));
 }
 
 export async function chargerArticle(id: string) {
@@ -269,11 +253,11 @@ export async function chargerEmplacement(id: string) {
 export async function chargerPalette(id: string) {
   const { data, error } = await supabase
     .from("palettes")
-    .select(PALETTE_SELECT)
+    .select("id, numero, quantite, lot, statut, created_at, emplacement_id, article_id, articles(reference, designation), emplacements(id, code, sites(nom))")
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
-  return (data as unknown as PaletteLigne | null) ?? null;
+  return (data as unknown as (PaletteDetail & { emplacement_id: string | null; article_id: string }) | null) ?? null;
 }
 
 export async function chargerMouvementsPalette(palette_id: string) {
@@ -294,30 +278,26 @@ export type ResultatsRecherche = {
   emplacements: Emplacement[];
 };
 
-/** Recherche libre : code palette, référence, désignation ou emplacement. */
+/** Recherche libre : article, référence, numéro de palette ou code emplacement. */
 export async function rechercheGlobale(terme: string): Promise<ResultatsRecherche> {
   const q = terme.trim();
   if (!q) return { articles: [], palettes: [], emplacements: [] };
-  const bas = q.toLowerCase();
-  const contient = (v?: string | null) => (v ?? "").toLowerCase().includes(bas);
+  const motif = `%${q}%`;
 
   const [stock, palettes, emplacements] = await Promise.all([
     chargerStockParArticle(),
-    chargerToutesPalettes(),
-    supabase.from("emplacements").select(EMPLACEMENT_SELECT).ilike("code", `%${q}%`).order("code"),
+    chargerPalettesLignes((r) => r.ilike("numero", motif)),
+    supabase.from("emplacements").select(EMPLACEMENT_SELECT).ilike("code", motif).order("code"),
   ]);
   if (emplacements.error) throw emplacements.error;
 
+  const bas = q.toLowerCase();
   return {
-    articles: stock.filter((a) => contient(a.reference) || contient(a.designation)),
-    palettes: palettes.filter(
-      (p) =>
-        contient(p.numero) ||
-        contient(p.emplacements?.code) ||
-        p.palette_contenus.some(
-          (c) => contient(c.articles?.reference) || contient(c.articles?.designation),
-        ),
+    articles: stock.filter(
+      (a) =>
+        a.reference.toLowerCase().includes(bas) || a.designation.toLowerCase().includes(bas),
     ),
+    palettes,
     emplacements: (emplacements.data ?? []) as Emplacement[],
   };
 }
