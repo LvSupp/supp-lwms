@@ -15,6 +15,7 @@ import { Route as CreationRouteImport } from './routes/creation'
 import { Route as DeplacementRouteImport } from './routes/deplacement'
 import { Route as HistoriqueRouteImport } from './routes/historique'
 import { Route as ParametresRouteImport } from './routes/parametres'
+import { Route as PreparationRouteImport } from './routes/preparation'
 import { Route as ReceptionRouteImport } from './routes/reception'
 import { Route as RechercheRouteImport } from './routes/recherche'
 
@@ -48,6 +49,11 @@ const ParametresRoute = ParametresRouteImport.update({
   path: '/parametres',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PreparationRoute = PreparationRouteImport.update({
+  id: '/preparation',
+  path: '/preparation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReceptionRoute = ReceptionRouteImport.update({
   id: '/reception',
   path: '/reception',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/deplacement': typeof DeplacementRoute
   '/historique': typeof HistoriqueRoute
   '/parametres': typeof ParametresRoute
+  '/preparation': typeof PreparationRoute
   '/reception': typeof ReceptionRoute
   '/recherche': typeof RechercheRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/deplacement': typeof DeplacementRoute
   '/historique': typeof HistoriqueRoute
   '/parametres': typeof ParametresRoute
+  '/preparation': typeof PreparationRoute
   '/reception': typeof ReceptionRoute
   '/recherche': typeof RechercheRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/deplacement': typeof DeplacementRoute
   '/historique': typeof HistoriqueRoute
   '/parametres': typeof ParametresRoute
+  '/preparation': typeof PreparationRoute
   '/reception': typeof ReceptionRoute
   '/recherche': typeof RechercheRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/deplacement'
     | '/historique'
     | '/parametres'
+    | '/preparation'
     | '/reception'
     | '/recherche'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/deplacement'
     | '/historique'
     | '/parametres'
+    | '/preparation'
     | '/reception'
     | '/recherche'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/deplacement'
     | '/historique'
     | '/parametres'
+    | '/preparation'
     | '/reception'
     | '/recherche'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   DeplacementRoute: typeof DeplacementRoute
   HistoriqueRoute: typeof HistoriqueRoute
   ParametresRoute: typeof ParametresRoute
+  PreparationRoute: typeof PreparationRoute
   ReceptionRoute: typeof ReceptionRoute
   RechercheRoute: typeof RechercheRoute
 }
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParametresRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/preparation': {
+      id: '/preparation'
+      path: '/preparation'
+      fullPath: '/preparation'
+      preLoaderRoute: typeof PreparationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reception': {
       id: '/reception'
       path: '/reception'
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeplacementRoute: DeplacementRoute,
   HistoriqueRoute: HistoriqueRoute,
   ParametresRoute: ParametresRoute,
+  PreparationRoute: PreparationRoute,
   ReceptionRoute: ReceptionRoute,
   RechercheRoute: RechercheRoute,
 }
