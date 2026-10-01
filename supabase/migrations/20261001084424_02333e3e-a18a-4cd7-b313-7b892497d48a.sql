@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.prelever_palette(uuid, jsonb) FROM PUBLIC, anon;
