@@ -65,8 +65,8 @@ function PagePreparation() {
       .filter((l) => l.article_id && Number(l.quantite) > 0)
       .map((l) => ({ article_id: l.article_id, quantite: Math.floor(Number(l.quantite)) }));
     const ids = lignes.map((l) => l.article_id);
-    if (!lignes.length) return toast.error("Ajoutez au moins une référence avec une quantité.");
-    if (new Set(ids).size !== ids.length) return toast.error("Une référence ne peut apparaître qu'une fois.");
+    if (!lignes.length) { toast.error("Ajoutez au moins une référence avec une quantité."); return; }
+    if (new Set(ids).size !== ids.length) { toast.error("Une référence ne peut apparaître qu'une fois."); return; }
     setPreleve({});
     setDemande(lignes);
     void qc.invalidateQueries({ queryKey: ["stock", "preparation"] });
@@ -249,7 +249,7 @@ function DialogMission({
       quantite: Math.max(0, Math.floor(Number(quantites[l.article_id] || 0))),
     }));
     const trop = mission.lignes.find((l) => lignes.find((x) => x.article_id === l.article_id)!.quantite > l.disponible);
-    if (trop) return toast.error(`Quantité supérieure au disponible pour ${trop.reference}.`);
+    if (trop) { toast.error(`Quantité supérieure au disponible pour ${trop.reference}.`); return; }
     setEnCours(true);
     try {
       await onValide(lignes);
