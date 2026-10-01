@@ -359,6 +359,10 @@ export type Database = {
         }
       }
       emplacement_reception: { Args: never; Returns: string }
+      prelever_palette: {
+        Args: { p_lignes: Json; p_palette_id: string }
+        Returns: undefined
+      }
       prochain_numero_palette: { Args: never; Returns: string }
     }
     Enums: {
