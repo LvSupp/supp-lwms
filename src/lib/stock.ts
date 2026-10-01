@@ -191,14 +191,35 @@ export type PaletteLigne = {
 };
 
 const LIGNE_SELECT =
-  "id, numero, quantite, lot, article_id, emplacement_id, articles(reference, designation), emplacements(id, code)";
+  "id, numero, quantite, lot, article_id, emplacement_id, articles(reference, designation), emplacements(id, code), palette_contenus(article_id, quantite, statut, articles(reference, designation))";
 
+type PaletteBrute = Omit<PaletteLigne, "article_id"> & {
+  article_id: string | null;
+  palette_contenus: {
+    article_id: string;
+    quantite: number;
+    statut: string;
+    articles: { reference: string; designation: string } | null;
+  }[] | null;
+};
+
+/** Une ligne par (palette, article) : contenus multi-références + article historique de la palette. */
 async function chargerPalettesLignes(filtre?: (q: any) => any) {
   let requete = supabase.from("palettes").select(LIGNE_SELECT).order("numero");
   if (filtre) requete = filtre(requete);
   const { data, error } = await requete;
   if (error) throw error;
-  return (data ?? []) as unknown as PaletteLigne[];
+  const lignes: PaletteLigne[] = [];
+  for (const p of (data ?? []) as unknown as PaletteBrute[]) {
+    const { palette_contenus, ...base } = p;
+    if (p.article_id && p.quantite > 0) lignes.push({ ...base, article_id: p.article_id });
+    for (const c of palette_contenus ?? []) {
+      if (c.statut !== "DISPONIBLE" || c.quantite <= 0) continue;
+      if (c.article_id === p.article_id) continue;
+      lignes.push({ ...base, article_id: c.article_id, quantite: c.quantite, articles: c.articles });
+    }
+  }
+  return lignes;
 }
 
 /** Stock agrégé par article : somme des quantités des palettes et nombre de palettes. */
@@ -222,12 +243,28 @@ export async function chargerStockParArticle(): Promise<LigneStock[]> {
   return [...parArticle.values()].sort((a, b) => a.reference.localeCompare(b.reference));
 }
 
+export async function chargerStockDisponible() {
+  return chargerPalettesLignes();
+}
+
 export async function chargerPalettesArticle(article_id: string) {
-  return chargerPalettesLignes((q) => q.eq("article_id", article_id));
+  return (await chargerPalettesLignes()).filter((l) => l.article_id === article_id);
 }
 
 export async function chargerPalettesEmplacement(emplacement_id: string) {
   return chargerPalettesLignes((q) => q.eq("emplacement_id", emplacement_id));
+}
+
+/** Prélève les quantités confirmées sur une palette (stock réel diminué, mouvement historisé). */
+export async function preleverPalette(
+  palette_id: string,
+  lignes: { article_id: string; quantite: number }[],
+) {
+  const { error } = await supabase.rpc("prelever_palette" as never, {
+    p_palette_id: palette_id,
+    p_lignes: lignes,
+  } as never);
+  if (error) throw error;
 }
 
 export async function chargerArticle(id: string) {

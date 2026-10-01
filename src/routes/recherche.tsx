@@ -220,7 +220,7 @@ function VueRecherche({
           <Titre icone={<Boxes className="size-4" />}>Palettes</Titre>
           <ul className="space-y-2">
             {data!.palettes.map((p) => (
-              <li key={p.id}>
+              <li key={`${p.id}-${p.article_id}`}>
                 <Carte onClick={() => onPalette(p.id)}>
                   <p className="font-display text-2xl leading-none">{p.numero}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -282,7 +282,7 @@ function DetailArticle({
         <Titre icone={<Boxes className="size-4" />}>Palettes ({palettes.data?.length ?? 0})</Titre>
         <ul className="space-y-2">
           {(palettes.data ?? []).map((p) => (
-            <li key={p.id}>
+            <li key={`${p.id}-${p.article_id}`}>
               <Carte onClick={() => onPalette(p.id)}>
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
                   <span className="truncate font-semibold">{p.numero}</span>
@@ -468,7 +468,7 @@ function DetailEmplacement({
         <Titre icone={<Boxes className="size-4" />}>Palettes présentes</Titre>
         <ul className="space-y-2">
           {(palettes.data ?? []).map((p) => (
-            <li key={p.id}>
+            <li key={`${p.id}-${p.article_id}`}>
               <Carte onClick={() => onPalette(p.id)}>
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
                   <span className="truncate font-semibold">{p.numero}</span>
